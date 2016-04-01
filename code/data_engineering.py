@@ -1,6 +1,5 @@
-'''
-The class performing data engineering on jobs file and pandas file
-'''
+""" Generate two csv files
+This class performing data engineering on jobs file and pandas file"""
 
 import pandas as pd
 import json
