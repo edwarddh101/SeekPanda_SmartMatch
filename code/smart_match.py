@@ -44,30 +44,42 @@ class Smart_match(object):
     def check_score(self,
                     panda,
                     metric={
-                           'specialities': 1,
+                           'specialties': 1,
                            'capabilities': 0.5
                             },
                     other=0.1):
         '''
         Help function to determine the socre for each panda
         '''
-        industry = self.df_jobs[self.df_jobs['id'] == self.job_id].iloc[0]
+        job = self.df_jobs[self.df_jobs['id'] == self.job_id]
+        industry = job['industry'].iloc[0]
         for k, v in metric.iteritems():
             if industry in panda[k].iloc[0]:
                 return v
-        else:
-            return other
+        return other
 
     def match_percentage(self):
         '''
         Calculate match_percentage for each pandas on the job based on:
         match_percentage = match_location * performance_score
         '''
-        self.df_jobs['match_percentage'] = self.df_jobs['location_match'] *\
-                                           self.df_jobs['performance_score']
+        location_score = self.df_pandas['location_match']
+        performance_score = self.df_pandas['performance_score']
+        self.df_pandas['match_percentage'] = location_score * performance_score
 
     def main(self):
         '''
         Return top 3 candidates for the job
         '''
-        self.
+        self.location_match()
+        self.performance_score()
+        self.match_percentage()
+        sorted_pandas = self.df_pandas.sort(columns='match_percentage',
+                                            axis=0,
+                                            ascending=False)
+        top_pandas = sorted_pandas[:3]
+        return top_pandas['name'], top_pandas['target_price']
+
+if __name__ == '__main__':
+    find_candidate = Smart_match(job_id=2)
+    print find_candidate.main()
