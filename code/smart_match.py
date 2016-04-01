@@ -8,7 +8,7 @@ class Smart_match(object):
     Find the top 3 condidate for the job
     '''
     def __init__(self,
-                 job_id,
+                 job_id=2,
                  jobs_file='result/extracted_jobs.csv',
                  pandas_file='result/extracted_pandas.csv'
                  ):
