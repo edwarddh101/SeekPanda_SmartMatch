@@ -82,4 +82,3 @@ class Smart_match(object):
 
 if __name__ == '__main__':
     find_candidate = Smart_match(job_id=2)
-    print find_candidate.main()
