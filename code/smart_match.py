@@ -36,10 +36,9 @@ class Smart_match(object):
         Calculate the performance_score for all pandas on the job
         '''
         self.df_pandas['performance_score'] = self.df_pandas['id'].apply(
-                        lambda x: self.check_score(
-                            panda=self.df_pandas[self.df_pandas['id'] == x]
-                            )
-                            )
+                            lambda x: self.check_score(
+                               panda=self.df_pandas[self.df_pandas['id'] == x]
+                            ))
 
     def check_score(self,
                     panda,

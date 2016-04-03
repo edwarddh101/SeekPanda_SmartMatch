@@ -57,6 +57,9 @@ class Data_engineering(object):
         '''
         start = '{"'
         try:
+            return json.loads(start+x[1:-1])
+        except:
+            return None
 
     def valid_record(self):
         '''
@@ -65,12 +68,10 @@ class Data_engineering(object):
         '''
         # jobs file
         self.df_jobs[self.jobs] = self.df_jobs[self.jobs].apply(
-                                  lambda x: self.jobs_json_loads(x[11:-2]))
+                                     lambda x: self.jobs_json_loads(x))
         # pandas file
-        start = '{"'
         self.df_pandas[self.prices] = self.df_pandas[self.prices].apply(
-                        lambda x: self.json_loads(start+x[1:-1]) if x else None
-                                                                       )
+                                        lambda x: self.pandas_json_loads(x))
 
     def extract_jobs(self,
                      time_period={'In the next 24 hours': 1,
@@ -86,7 +87,8 @@ class Data_engineering(object):
         # jobs file
         self.df_jobs[inserted_at] = pd.to_datetime(self.df_jobs[inserted_at])
         for k, v in self.field_code.iteritems():
-            self.df_jobs[k] = self.df_jobs['job_details'].apply(lambda x: x[v])
+            self.df_jobs[k] = self.df_jobs['job_details'].apply(
+                                     lambda x: x[v] if x else None)
         # Combine deadline information
         self.df_jobs[deadline].fillna(self.df_jobs[deadline2],
                                       inplace=True)
@@ -98,16 +100,23 @@ class Data_engineering(object):
                                                  unit='d'
                                                  )+self.df_jobs[inserted_at]
 
-    def extract_prices(self,
-                       target='interpretation_target'
-                       ):
+    def extract_prices_help(self, x):
+        '''
+        Help function for extract_prices function
+        '''
+        target = 'interpretation_target'
+        try:
+            return float(x[target])
+        except:
+            return 999999
+
+    def extract_prices(self):
         '''
         Extract target price field in pandas file
         '''
         # Set the missing value to 999999
         self.df_pandas['target_price'] = self.df_pandas['prices'].apply(
-                                            lambda x: float(x[target])
-                                            if target in x.keys() else 999999)
+                                     lambda x: self.extract_prices_help(x))
 
     def main(self):
         '''
