@@ -11,10 +11,10 @@ class Data_engineering(object):
     fileds to corresponding column
     '''
     def __init__(self,
-                 jobs_file='data/raw_data_jobs.csv',
-                 pandas_file='data/raw_data_pandas.csv',
-                 output_jobs='result/extracted_jobs.csv',
-                 output_pandas='result/extracted_pandas.csv',
+                 raw_jobs='data/raw_data_jobs.csv',
+                 raw_pandas='data/raw_data_pandas.csv',
+                 extracted_jobs='result/extracted_jobs.csv',
+                 extracted_pandas='result/extracted_pandas.csv',
                  jobs='job_details',
                  prices='prices',
                  field_code={'industry': 'dropdown_7603830',
@@ -26,10 +26,10 @@ class Data_engineering(object):
                              'deadline2': 'list_9080733_choice'},
                  price_code={'target_price': 'interpretation_target'}
                  ):
-        self.jobs_file = jobs_file
-        self.pandas_file = pandas_file
-        self.output_jobs = output_jobs
-        self.output_pandas = output_pandas
+        self.raw_jobs = raw_jobs
+        self.raw_pandas = raw_pandas
+        self.extracted_jobs = extracted_jobs
+        self.extracted_pandas = extracted_pandas
         self.jobs = jobs
         self.prices = prices
         self.field_code = field_code
@@ -39,7 +39,24 @@ class Data_engineering(object):
         '''
         read csv file to pandas dataframe
         '''
-        return pd.read_csv(self.jobs_file), pd.read_csv(self.pandas_file)
+        return pd.read_csv(self.raw_jobs), pd.read_csv(self.raw_pandas)
+
+    def jobs_json_loads(self, x):
+        '''
+        help function to do json loads for jobs file
+        '''
+        x = str(x)
+        try:
+            return json.loads(x[11:-2])
+        except:
+            return None
+
+    def pandas_json_loads(self, x):
+        '''
+        help function to do json loads for pandas file
+        '''
+        start = '{"'
+        try:
 
     def valid_record(self):
         '''
@@ -47,15 +64,13 @@ class Data_engineering(object):
         and pandas_file
         '''
         # jobs file
-        self.df_jobs = self.df_jobs[pd.notnull(self.df_jobs[self.jobs])]
         self.df_jobs[self.jobs] = self.df_jobs[self.jobs].apply(
-                                    lambda x: json.loads(x[11:-2]))
+                                  lambda x: self.jobs_json_loads(x[11:-2]))
         # pandas file
-        empty = '{}'
         start = '{"'
-        self.df_pandas = self.df_pandas[self.df_pandas[self.prices] != empty]
         self.df_pandas[self.prices] = self.df_pandas[self.prices].apply(
-                                         lambda x: json.loads(start+x[1:-1]))
+                        lambda x: self.json_loads(start+x[1:-1]) if x else None
+                                                                       )
 
     def extract_jobs(self,
                      time_period={'In the next 24 hours': 1,
@@ -101,8 +116,8 @@ class Data_engineering(object):
         self.valid_record()
         self.extract_jobs()
         self.extract_prices()
-        self.df_jobs.to_csv(self.output_jobs)
-        self.df_pandas.to_csv(self.output_pandas)
+        self.df_jobs.to_csv(self.extracted_jobs)
+        self.df_pandas.to_csv(self.extracted_pandas)
 
 if __name__ == '__main__':
     data = Data_engineering()
