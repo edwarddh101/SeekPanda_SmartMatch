@@ -10,6 +10,9 @@ from data_engineering import Data_engineering
 import slackweb
 from time import sleep
 import pandas as pd
+import cStringIO
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 class Automation(object):
@@ -17,21 +20,52 @@ class Automation(object):
     automate the smart match process
     '''
     def __init__(self,
+                 jobs='jobs',
+                 pandas='pandas',
                  raw_jobs='data/raw_data_jobs.csv',
                  raw_pandas='data/raw_data_pandas.csv',
                  extracted_jobs='result/extracted_jobs.csv',
                  extracted_pandas='result/extracted_pandas.csv',
                  url='wwww.seekpanda.com/#/jobs/',
+                 credentials_file='file/SeekPanda-4fae65c0414a.json',
+                 doc_url="".join([
+                   'https://docs.google.com/spreadsheets/d/',
+                   '1_G-YDPJBpLBOzCMxcYSVradpXjL35SysgzZJHldI9gM/edit#gid=0'
+                                 ]),
                  webhook="".join([
                             'https://hooks.slack.com/services/T02TZ1FKK/',
                             'B0VEPAFFH/ALkrk9HLNebUZAC0jDJFxJkE'])):
+        self.jobs = jobs,
+        self.pandas = pandas,
         self.raw_jobs = raw_jobs
         self.raw_pandas = raw_pandas
         self.extracted_jobs = extracted_jobs
         self.extracted_pandas = extracted_pandas
         self.webhook = webhook
         self.url = url
+        self.credentials_file = credentials_file
+        self.doc_url = doc_url
         self.new_jobs = self.detect_new_job()
+
+    def parse_google_doc(self):
+        '''
+        parse the data from google url via gspread api
+        '''
+        scope = ['https://spreadsheets.google.com/feeds']
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+                                                        self.credentials_file,
+                                                        scope)
+        gc = gspread.authorize(credentials)
+        spreadsheets = gc.open_by_url(self.doc_url)
+        jobs_sheet = spreadsheets.worksheet(self.jobs)
+        pandas_sheet = spreadsheets.worksheet(self.pandas)
+        return jobs_sheet, pandas_sheet
+
+    def gsheet_df(self):
+        '''
+        Transfer gspread worksheet to panda data frame
+        '''
+        pass
 
     def detect_new_job(self):
         '''
