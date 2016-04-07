@@ -11,8 +11,8 @@ class Data_engineering(object):
     fileds to corresponding column
     '''
     def __init__(self,
-                 raw_jobs='data/raw_data_jobs.csv',
-                 raw_pandas='data/raw_data_pandas.csv',
+                 df_jobs,
+                 df_pandas,
                  extracted_jobs='result/extracted_jobs.csv',
                  extracted_pandas='result/extracted_pandas.csv',
                  jobs='job_details',
@@ -26,20 +26,19 @@ class Data_engineering(object):
                              'deadline2': 'list_9080733_choice'},
                  price_code={'target_price': 'interpretation_target'}
                  ):
-        self.raw_jobs = raw_jobs
-        self.raw_pandas = raw_pandas
+        self.df_jobs = df_jobs
+        self.df_pandas = df_pandas
         self.extracted_jobs = extracted_jobs
         self.extracted_pandas = extracted_pandas
         self.jobs = jobs
         self.prices = prices
         self.field_code = field_code
-        self.df_jobs, self.df_pandas = self.read_csv()
 
-    def read_csv(self):
-        '''
-        read csv file to pandas dataframe
-        '''
-        return pd.read_csv(self.raw_jobs), pd.read_csv(self.raw_pandas)
+    # def read_csv(self):
+    #     '''
+    #     read csv file to pandas dataframe
+    #     '''
+    #     return pd.read_csv(self.raw_jobs), pd.read_csv(self.raw_pandas)
 
     def jobs_json_loads(self, x):
         '''
